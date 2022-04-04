@@ -3,7 +3,7 @@ const ErrorMessage = ({ errorMessage, setErrorMessage }) => {
   return (
     <div className="notification is-danger container mt-5 mb-0 has-text-centered">
       <button className="delete" onClick={() => setErrorMessage(null)}></button>
-      {`MetaMask Error ${errorMessage.code} - ${errorMessage.message}
+      {`${errorMessage.code} - ${errorMessage.message}
     `}
     </div>
   );

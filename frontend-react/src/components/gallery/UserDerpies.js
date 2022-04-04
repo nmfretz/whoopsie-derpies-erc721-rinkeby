@@ -1,15 +1,15 @@
-import UserDerpy from "./UserDerpy";
+import DerpieCard from "../derpieCard/DerpieCard";
 
-const UserGallery = ({ userDerpieDetails }) => {
+const UserDerpies = ({ userDerpieDetails }) => {
   return (
     <>
       <div className="is-flex is-justify-content-center is-flex-wrap-wrap custom-gallery-gap">
         {userDerpieDetails.map((derpie, index) => (
-          <UserDerpy key={index} derpieDetails={derpie} />
+          <DerpieCard key={index} derpieDetails={derpie} />
         ))}
       </div>
     </>
   );
 };
 
-export default UserGallery;
+export default UserDerpies;

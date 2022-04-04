@@ -1,4 +1,4 @@
-const MetaMaskOpen = () => {
+const WalletOpenMessage = () => {
   return (
     <div className="notification is-primary is-light container mt-5">
       <span>Metamask is open and waiting on user to confirm transaction...</span>
@@ -6,4 +6,4 @@ const MetaMaskOpen = () => {
   );
 };
 
-export default MetaMaskOpen;
+export default WalletOpenMessage;

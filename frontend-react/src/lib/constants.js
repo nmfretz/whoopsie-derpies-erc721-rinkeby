@@ -1,0 +1,19 @@
+const MINUTES_TO_MILLISECONDS = 60 * 1000;
+export const CHAINLINK_WAIT_TIME_MS = 0.5 * MINUTES_TO_MILLISECONDS; // 30 seconds
+
+export const PRODUCTION = true; // change this for production vs development
+
+export let DERPIES_ADDRESS;
+export let CORRECT_CHAIN_ID;
+
+if (PRODUCTION) {
+  // deployment
+  DERPIES_ADDRESS = process.env.REACT_APP_DERPIES_ADDRESS_RINKEBY;
+  CORRECT_CHAIN_ID = "0x4";
+} else {
+  // development
+  DERPIES_ADDRESS = process.env.REACT_APP_DERPIES_ADDRESS_LOCALHOST;
+  CORRECT_CHAIN_ID = "0x539";
+}
+
+export const VRFCOORDINATORMOCK_ADDRESS_LOCALHOST = process.env.REACT_APP_VRFCOORDINATORMOCK_ADDRESS_LOCALHOST;

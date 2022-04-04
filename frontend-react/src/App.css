@@ -13,11 +13,28 @@
   width: 100px;
 }
 
+.custom-navbar {
+  /* position: fixed; */
+  /* width: 100%; */
+  /* background-color: transparent; */
+}
+
 .custom-position-absolute-warning {
   position: absolute;
   width: 100%;
   padding-top: 5rem;
   padding-bottom: 5rem;
+}
+
+.custom-wallet-btns-div {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  align-items: center;
+  margin-top: 2rem;
+}
+.custom-connect-btn {
+  width: 400px;
 }
 
 .custom-connect-status {
@@ -52,6 +69,11 @@
 .custom-details-list li {
   list-style-type: disc;
   margin-left: 2em;
+}
+
+.custom-mint-wait-btn {
+  border: none;
+  background-color: transparent;
 }
 
 .custom-gallery-gap {

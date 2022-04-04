@@ -34,7 +34,7 @@ const About = ({ setSelectedTab }) => {
           Whoopsie Derpies is an NFT art collection deployed to the Ethereum <strong>Rinkeby</strong> Testnet. Inspired
           by drawing animals for our twin toddlers whilst getting bumped around and receiving conflicting requests. The
           animals are cute and just a little bit derpy. View minted collection on{" "}
-          <a href="https://testnets.opensea.io/collection/whoopsiederpies" target="_blank">
+          <a href="https://testnets.opensea.io/collection/whoopsiederpies" target="_blank" rel="noreferrer">
             Opensea (rinkeby testnet)
           </a>
           .
@@ -42,64 +42,64 @@ const About = ({ setSelectedTab }) => {
 
         <div className="is-flex is-flex-wrap-wrap is-justify-content-center mb-6 custom-mobile-margin">
           <figure className="image is-96x96 mr-2 custom-mobile-img">
-            <img src={Beaver} />
+            <img src={Beaver} alt="" />
           </figure>
           <figure className="image is-96x96 mr-2 custom-mobile-img">
-            <img src={Bunny} />
+            <img src={Bunny} alt="" />
           </figure>
           <figure className="image is-96x96 mr-2 custom-mobile-img">
-            <img src={Cat} />
+            <img src={Cat} alt="" />
           </figure>
           <figure className="image is-96x96 mr-2 custom-mobile-img">
-            <img src={Cheetah} />
+            <img src={Cheetah} alt="" />
           </figure>
           <figure className="image is-96x96 mr-2 custom-mobile-img">
-            <img src={Elephant} />
+            <img src={Elephant} alt="" />
           </figure>
           <figure className="image is-96x96 mr-2 custom-mobile-img">
-            <img src={Flamingo} />
+            <img src={Flamingo} alt="" />
           </figure>
           <figure className="image is-96x96 mr-2 custom-mobile-img">
-            <img src={Fox} />
+            <img src={Fox} alt="" />
           </figure>
           <figure className="image is-96x96 mr-2 custom-mobile-img">
-            <img src={Giraffe} />
+            <img src={Giraffe} alt="" />
           </figure>
           <figure className="image is-96x96 mr-2 custom-mobile-img">
-            <img src={Hedgie} />
+            <img src={Hedgie} alt="" />
           </figure>
           <figure className="image is-96x96 mr-2 custom-mobile-img">
-            <img src={Horse} />
+            <img src={Horse} alt="" />
           </figure>
           <figure className="image is-96x96 mr-2 custom-mobile-img">
-            <img src={Lemur} />
+            <img src={Lemur} alt="" />
           </figure>
           <figure className="image is-96x96 mr-2 custom-mobile-img">
-            <img src={Llama} />
+            <img src={Llama} alt="" />
           </figure>
           <figure className="image is-96x96 mr-2 custom-mobile-img">
-            <img src={Narwhal} />
+            <img src={Narwhal} alt="" />
           </figure>
           <figure className="image is-96x96 mr-2 custom-mobile-img">
-            <img src={Octopus} />
+            <img src={Octopus} alt="" />
           </figure>
           <figure className="image is-96x96 mr-2 custom-mobile-img">
-            <img src={Orca} />
+            <img src={Orca} alt="" />
           </figure>
           <figure className="image is-96x96 mr-2 custom-mobile-img">
-            <img src={Pig} />
+            <img src={Pig} alt="" />
           </figure>
           <figure className="image is-96x96 mr-2 custom-mobile-img">
-            <img src={Rhino} />
+            <img src={Rhino} alt="" />
           </figure>
           <figure className="image is-96x96 mr-2 custom-mobile-img">
-            <img src={Sandpiper} />
+            <img src={Sandpiper} alt="" />
           </figure>
           <figure className="image is-96x96 mr-2 custom-mobile-img">
-            <img src={Shark} />
+            <img src={Shark} alt="" />
           </figure>
           <figure className="image is-96x96 mr-2 custom-mobile-img">
-            <img src={Squirrel} />
+            <img src={Squirrel} alt="" />
           </figure>
         </div>
       </section>
@@ -108,30 +108,16 @@ const About = ({ setSelectedTab }) => {
         <div className="is-flex is-justify-content-center is-align-items-center is-flex-wrap-wrap">
           <div>
             <figure className="image custom-about-img">
-              <img src={Cheetah} />
+              <img src={Cheetah} alt="" />
             </figure>
           </div>
           <div className="custom-about-text p-5">
             <h1 className="title">Development Details</h1>
             <p className="pb-2 custom-smaller-mobile-text">
-              This is an independent project to showcase familiarity with the Ethereum ecosystem, including Solidity,
-              the Hardhat development environment, and oracles. The website frontend was developed using React. View the
-              entire project code at this
-              <a href="https://github.com/nmfretz" target="_blank">
-                {" "}
-                github repository.
-              </a>{" "}
-              Verified smart contract code is also viewable on Rinkeby Etherscan{" "}
-              <a href="https://rinkeby.etherscan.io/address/0xFae806Ef5fDadCBa0db4716228EC625d1FC64196" target="_blank">
-                here
-              </a>
-              .
-            </p>
-            <p className="pb-2 custom-smaller-mobile-text">
               The Whoospie Derpies smart contract follows the ERC721 Non-Fungible Token Standard. Development details
               are as follows:
             </p>
-            <ul className="custom-details-list custom-smaller-mobile-text">
+            <ul className="pb-2 custom-details-list custom-smaller-mobile-text">
               <li>Inherits from OpenZeppelin's ERC721Enumerable and Ownable interfaces.</li>
               <li>
                 Inherits from Chainlink's VRFConsumerBase to obtain verifiable random numbers on-chain and assign a
@@ -139,6 +125,22 @@ const About = ({ setSelectedTab }) => {
               </li>
               <li>Metadata and images are stored on IPFS and pinned using Pinata.</li>
             </ul>
+            <p className="custom-smaller-mobile-text">
+              View the entire project code at this
+              <a href="https://github.com/nmfretz" target="_blank" rel="noreferrer">
+                {" "}
+                github repository.
+              </a>{" "}
+              Verified smart contract code is also viewable on Rinkeby Etherscan{" "}
+              <a
+                href="https://rinkeby.etherscan.io/address/0xFae806Ef5fDadCBa0db4716228EC625d1FC64196"
+                target="_blank"
+                rel="noreferrer"
+              >
+                here
+              </a>
+              .
+            </p>
           </div>
         </div>
 
@@ -152,7 +154,7 @@ const About = ({ setSelectedTab }) => {
             </p>
             <p>
               The specific animal you mint is determined during the minting process, using{" "}
-              <a href="https://docs.chain.link/docs/chainlink-vrf/" target="_blank">
+              <a href="https://docs.chain.link/docs/chainlink-vrf/" target="_blank" rel="noreferrer">
                 Chainlink's VRF
               </a>{" "}
               to introduce randomness.
@@ -160,7 +162,7 @@ const About = ({ setSelectedTab }) => {
           </div>
           <div>
             <figure className="image custom-about-img">
-              <img src={Hedgie} />
+              <img src={Hedgie} alt="" />
             </figure>
           </div>
         </div>

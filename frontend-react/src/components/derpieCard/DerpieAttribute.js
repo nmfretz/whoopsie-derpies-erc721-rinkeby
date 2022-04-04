@@ -1,4 +1,4 @@
-const Attribute = ({ derpieDetails, traitNum }) => {
+const DerpieAttribute = ({ derpieDetails, traitNum }) => {
   return (
     <div className="custom-attribute">
       <span className="custom-attribute__trait">{derpieDetails.uriJSON.attributes[traitNum].trait_type}</span>
@@ -7,4 +7,4 @@ const Attribute = ({ derpieDetails, traitNum }) => {
   );
 };
 
-export default Attribute;
+export default DerpieAttribute;

@@ -1,32 +1,38 @@
+import { useMoralis } from "react-moralis";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar } from "@fortawesome/free-solid-svg-icons";
 
-import UserDerpy from "./UserDerpy";
-import MetamaskWarning from "./MetamaskWarning";
-import MintProgressNotification from "./MintProgressNotification";
-import ErrorMessage from "./ErrorMessage";
-import MetaMaskOpen from "./MetaMaskOpen";
-import MetaMaskButton from "./MetaMaskButton";
+import DerpieCard from "./derpieCard/DerpieCard";
+import MintProgressNotification from "./alerts/MintProgressNotification";
+import ErrorMessage from "./alerts/ErrorMessage";
+import MetaMaskOpen from "./alerts/WalletOpenMessage";
+import ConnectButton from "./ConnectButton";
+
+import FoxMetamask from "../img/FoxFace.png";
+import walletConnectImg from "../img/wallet-connect.jpg";
+
+import { CORRECT_CHAIN_ID } from "../lib/constants";
 
 const Mint = (props) => {
   const {
-    noMetaMaskDetectedError,
-    connectWalletHandler,
-    isConnecting,
-    isConnected,
+    isMetamaskInstalled,
     errorMessageConnect,
     setErrorMessageConnect,
     mintDerpieHandler,
     metamaskWaitingOnUser,
     mintingInProgress,
-    mintWaitTimer,
+    awaitingBlockConfirmation,
     setSelectedTab,
     transactionHash,
     isNewlyMinted,
     mintedDerpieDetails,
     errorMessageMint,
     setErrorMessageMint,
+    handleConnectMetaMask,
+    handleWalletConnect,
   } = props;
+
+  const { isWeb3Enabled, isWeb3EnableLoading, chainId } = useMoralis();
 
   return (
     <div className="background">
@@ -41,25 +47,38 @@ const Mint = (props) => {
         </p>
         <p className="custom-smaller-mobile-text">
           You can get test ether from a faucet. Try this one:{" "}
-          <a href="https://faucets.chain.link/rinkeby" target="_blank">
+          <a href="https://faucets.chain.link/rinkeby" target="_blank" rel="noreferrer">
             https://faucets.chain.link/rinkeby
           </a>
         </p>
 
-        {noMetaMaskDetectedError && <MetamaskWarning />}
+        {!isWeb3Enabled && (
+          <div className="custom-wallet-btns-div">
+            <ConnectButton
+              isWeb3EnableLoading={isWeb3EnableLoading}
+              connectWalletHandler={handleConnectMetaMask}
+              logo={FoxMetamask}
+              text={"Connect With MetaMask"}
+              isDisabled={isMetamaskInstalled}
+            />
 
-        {!isConnected && !noMetaMaskDetectedError && (
-          <MetaMaskButton isConnecting={isConnecting} connectWalletHandler={connectWalletHandler} />
+            <ConnectButton
+              isWeb3EnableLoading={isWeb3EnableLoading}
+              connectWalletHandler={handleWalletConnect}
+              logo={walletConnectImg}
+              text={"Wallet Connect"}
+            />
+          </div>
         )}
 
         {errorMessageConnect && (
           <ErrorMessage errorMessage={errorMessageConnect} setErrorMessage={setErrorMessageConnect} />
         )}
 
-        {isConnected && (
+        {isWeb3Enabled && (
           <button
             className={`button mt-4 mb-4 ${metamaskWaitingOnUser ? "is-loading" : ""}`}
-            disabled={mintingInProgress}
+            disabled={mintingInProgress || chainId !== CORRECT_CHAIN_ID}
             onClick={mintDerpieHandler}
           >
             Mint a Whoospie Derpie
@@ -69,23 +88,29 @@ const Mint = (props) => {
         {metamaskWaitingOnUser && <MetaMaskOpen />}
         {mintingInProgress && (
           <MintProgressNotification
-            mintWaitTimer={mintWaitTimer}
+            awaitingBlockConfirmation={awaitingBlockConfirmation}
             setSelectedTab={setSelectedTab}
             transactionHash={transactionHash}
           />
         )}
+        {/* <MintProgressNotification
+          awaitingBlockConfirmation={awaitingBlockConfirmation}
+     
+          setSelectedTab={setSelectedTab}
+          transactionHash={transactionHash}
+        /> */}
         {errorMessageMint !== null && (
           <ErrorMessage errorMessage={errorMessageMint} setErrorMessage={setErrorMessageMint} />
         )}
         <div className="is-flex is-flex-direction-column is-justify-content-center is-align-items-center mt-4">
-          {isNewlyMinted && (
+          {isWeb3Enabled && isNewlyMinted && (
             <>
               <p className="is-size-4 is-uppercase">
                 <FontAwesomeIcon className="fas fa-2x fa-solid is-size-3 " icon={faStar} /> a new derpie is born!{" "}
                 <FontAwesomeIcon className="fas fa-2x fa-solid is-size-3" icon={faStar} />
               </p>
               <div className="is-flex is-flex-direction-column is-justify-content-center is-align-items-center mt-4">
-                {isNewlyMinted && <UserDerpy derpieDetails={mintedDerpieDetails} />}
+                <DerpieCard derpieDetails={mintedDerpieDetails} />
               </div>
               <p className="is-size-7 pt-3">Transaction Hash:</p>
               <p className="is-size-7">{transactionHash}</p>

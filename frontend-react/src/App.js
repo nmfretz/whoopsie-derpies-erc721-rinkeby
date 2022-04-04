@@ -1,41 +1,51 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { ethers } from "ethers";
+import { useMoralis } from "react-moralis";
 
 import "bulma/css/bulma.css";
 import "./App.css";
 import Navbar from "./components/Navbar";
 import About from "./components/About";
 import Mint from "./components/Mint";
-import Gallery from "./components/Gallery";
-import AccountChangedWarning from "./components/AccountChangedWarning";
-import RinkebyWarning from "./components/RinkebyWarning";
-import { DERPIES_ADDRESS, VRFCOORDINATORMOCK_ADDRESS_LOCALHOST, CHAINLINK_WAIT_TIME_MINUTES } from "./constants";
+import Gallery from "./components/gallery/Gallery";
+import AccountChangedWarning from "./components/alerts/AccountChangedWarning";
+import RinkebyWarning from "./components/alerts/RinkebyWarning";
+import {
+  PRODUCTION,
+  CORRECT_CHAIN_ID,
+  DERPIES_ADDRESS,
+  VRFCOORDINATORMOCK_ADDRESS_LOCALHOST,
+  CHAINLINK_WAIT_TIME_MS,
+} from "./lib/constants";
+import { range } from "./lib/range";
+import delay from "./lib/delay";
 
-// import Derpies from "./contracts/localhost/Derpies.json"; // development
-import Derpies from "./contracts/rinkeby/Derpies.json"; // deployment
+import DerpiesLocalHost from "./contracts/localhost/Derpies.json";
+import DerpiesRinkeby from "./contracts/rinkeby/Derpies.json";
 import VRFCoordinatorMock from "./contracts/localhost/VRFCoordinatorMock.json";
-import ChainChangedWarning from "./components/ChainChangedWarning";
+
+let Derpies;
+if (PRODUCTION) {
+  Derpies = DerpiesRinkeby; // deployment
+} else {
+  Derpies = DerpiesLocalHost; // development
+}
 
 function App() {
+  const { enableWeb3, isWeb3Enabled, chainId, account, Moralis } = useMoralis();
+
   const [selectedTab, setSelectedTab] = useState("About");
 
-  // account state
-  const [isConnected, setIsConnected] = useState(false);
-  const [isConnecting, setIsConnecting] = useState(false);
-  const [connectedAccount, setConnectedAccount] = useState("not connected");
-  const [connectedNetwork, setConnectedNetwork] = useState("none");
-  const [rinkebyWarning, setRinkebyWarning] = useState(false);
-  const [chainChanged, setChainChanged] = useState(false);
-  const [accountChanged, setAccountChanged] = useState(false);
+  // wallet loading state
+  const [isMetamaskLoading, setIsMetamaskLoading] = useState(false);
+  const [isWalletConnectLoading, setIsWalletConnectLoading] = useState(false);
 
   // minting state
-  const isMountedMint = useRef(false); // object
   const [metamaskWaitingOnUser, setMetamaskWaitingOnUser] = useState(false);
   const [mintingInProgress, setMintingInProgress] = useState(false);
+  const [awaitingBlockConfirmation, setAwaitingBlockConfirmation] = useState(false);
   const [transactionHash, setTransactionHash] = useState(null);
-  const [mintWaitTimer, setMintWaitTimer] = useState(null);
   const [isNewlyMinted, setIsNewlyMinted] = useState(false);
-  const [newlyMintedDerpie, setNewlyMintedDerpy] = useState(null);
   const [mintedDerpieDetails, setMintedDerpieDetails] = useState(null);
 
   // gallery state
@@ -43,158 +53,70 @@ function App() {
   const [gettingUserDerpies, setGettingUserDerpies] = useState(false);
   const [userDerpieDetails, setUserDerpieDetails] = useState([]);
 
-  // error state
+  // warning and error state
+  const [isMetamaskInstalled, setIsMetamaskInstalled] = useState(false);
   const [errorMessageConnect, setErrorMessageConnect] = useState(null);
+  const [showAccountChangedWarning, setShowAccountChangedWarning] = useState(false);
   const [errorMessageMint, setErrorMessageMint] = useState(null);
   const [errorMessageGallery, setErrorMessageGallery] = useState(null);
-  const [errorMessageFetch, setErrorMessageFetch] = useState(null);
-  const [noMetaMaskDetectedError, setNoMetaMaskDetectedError] = useState(false);
 
-  async function connectWalletHandler() {
-    clearErrorMessages();
-    setIsConnecting(true);
-
-    if (window.ethereum && window.ethereum.isMetaMask) {
-      try {
-        const [account] = await window.ethereum.request({ method: "eth_requestAccounts" });
-        const network = window.ethereum.networkVersion;
-        // console.log(`metamask connected with account: ${account} to network ID: ${network}`);
-        setConnectedAccount(`${account.slice(0, 4)}...${account.slice(-4)}`);
-        setConnectedNetwork(network);
-        setIsConnected(true);
-        if (network !== "4") {
-          setRinkebyWarning(true);
-        } else {
-          setRinkebyWarning(false);
-        }
-      } catch (error) {
-        // console.log(`${error.code} ${error.message}`);
-        setErrorMessageConnect(error);
-      }
-      setIsConnecting(false);
+  // Check for metamask on page load
+  useEffect(() => {
+    if (!window.ethereum) {
+      console.log("no metamask detected");
+      setIsMetamaskInstalled(true);
     }
+  }, []);
+
+  async function handleConnectMetaMask() {
+    setIsMetamaskLoading(true);
+    console.log("connecting to metamask");
+    const web3Provider = await enableWeb3();
+    console.log(web3Provider);
+    setIsMetamaskLoading(false);
   }
 
-  async function getUserDerpiesHandler() {
-    clearErrorMessages();
-    setGettingUserDerpies(true);
+  async function handleWalletConnect() {
+    setIsWalletConnectLoading(true);
 
-    try {
-      if (typeof window.ethereum !== "undefined") {
-        const [account] = await window.ethereum.request({ method: "eth_requestAccounts" });
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        const contract = new ethers.Contract(DERPIES_ADDRESS, Derpies.abi, provider);
-        const numDerpies = await contract.balanceOf(account);
-
-        // to use in below for await
-        let derpieIterable = [];
-        for (let i = 0; i < parseInt(numDerpies.toString()); i++) {
-          derpieIterable.push(i);
-        }
-
-        // TODO - merge the below two for...of loops together.
-        let tokenIdArray = [];
-        for await (const derpie of derpieIterable) {
-          const tokenId = await contract.tokenOfOwnerByIndex(account, derpie);
-          tokenIdArray.push(parseInt(tokenId.toString()));
-        }
-
-        let tempDerpieDetails = [];
-        for await (const tokenId of tokenIdArray) {
-          const tokenUri = await contract.tokenURI(parseInt(tokenId.toString()));
-          const tokenUriHttps = `https://ipfs.io/ipfs/${tokenUri.split("").splice(7).join("")}`;
-          const uriJSON = await fetchMetadata(tokenUriHttps);
-          tempDerpieDetails.push({ tokenId, uriJSON });
-        }
-
-        setUserDerpieDetails([...tempDerpieDetails]);
-        setShowGallery(true);
-        setGettingUserDerpies(false);
-      }
-    } catch (error) {
-      // console.log(error);
-      setErrorMessageGallery(error);
-      setGettingUserDerpies(false);
-    }
+    console.log("connecting to Wallet Connect");
+    const web3Provider = enableWeb3({
+      provider: "walletconnect",
+      mobileLinks: ["rainbow", "metamask", "trust"],
+    });
+    console.log(web3Provider);
+    setIsWalletConnectLoading(false);
   }
 
-  async function mintDerpieHandler() {
-    clearErrorMessages();
-    setIsNewlyMinted(false);
+  // listen for EIP-1193 events
+  useEffect(() => {
+    // Moralis.onWeb3Enabled((result) => {
+    //   console.log(result);
+    // });
 
-    try {
-      if (typeof window.ethereum !== "undefined") {
-        await mintDerpie();
-        setMintingInProgress(false);
-      }
-    } catch (error) {
-      // console.log(error);
-      setMintingInProgress(false);
-      setErrorMessageMint(error);
-    }
-    // reset to false for the case where user rejects metamask transaction
-    setMetamaskWaitingOnUser(false);
-    setMintingInProgress(false);
-  }
-
-  async function mintDerpie() {
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
-    const derpiesContract = new ethers.Contract(DERPIES_ADDRESS, Derpies.abi, signer);
-
-    setMetamaskWaitingOnUser(true);
-
-    const mintTx = await derpiesContract.mintDerpie({
-      value: ethers.utils.parseEther("0.01"),
+    Moralis.onChainChanged((result) => {
+      console.log(result);
+      clearErrorMessages();
     });
 
-    const startTimer = Date.now();
-    setMintWaitTimer(startTimer + CHAINLINK_WAIT_TIME_MINUTES);
-
-    setTransactionHash(mintTx.hash);
-
-    setMetamaskWaitingOnUser(false);
-    setMintingInProgress(true);
-
-    const mintTxReceipt = await mintTx.wait();
-    // console.log(mintTxReceipt);
-    const requestId = mintTxReceipt.logs[3].topics[1];
-    const tokenId = mintTxReceipt.events[3].topics[2];
-
-    // VRFCOORDINATORMOCK for localhost tests only
-    if (window.ethereum.networkVersion === "1337") {
-      await vrfCoordinatorMockTx(signer, derpiesContract, requestId);
-    }
-
-    // Wait for chainlink vrf before requesting metadata
-    // console.log("waiting for chainlink vrf");
-    await waitForChainlinkVRF(CHAINLINK_WAIT_TIME_MINUTES - (Date.now() - startTimer));
-
-    setNewlyMintedDerpy(tokenId);
-  }
-
-  // TODO - listen for emitted event instead
-  async function waitForChainlinkVRF(waitTimeMilliseconds) {
-    return new Promise((resolve) => {
-      setTimeout(resolve, waitTimeMilliseconds);
+    Moralis.onWeb3Deactivated((result) => {
+      console.log(result);
+      clearErrorMessages();
     });
-  }
 
-  async function vrfCoordinatorMockTx(signer, derpiesContract, requestId) {
-    const vrfCoordinatorContract = new ethers.Contract(
-      VRFCOORDINATORMOCK_ADDRESS_LOCALHOST,
-      VRFCoordinatorMock.abi,
-      signer
-    );
-    const randNumTx = await vrfCoordinatorContract.callBackWithRandomness(requestId, 22, derpiesContract.address);
-    await randNumTx.wait();
-  }
+    Moralis.onAccountChanged((result) => {
+      console.log(result);
+      setShowAccountChangedWarning(true);
+      setTimeout(() => {
+        setShowAccountChangedWarning(false);
+      }, 3000);
+    });
 
-  function clearErrorMessages() {
-    setErrorMessageConnect(null);
-    setErrorMessageMint(null);
-    setErrorMessageGallery(null);
-  }
+    // Moralis.onDisconnect((error) => {
+    //   console.log(error);
+    //   clearErrorMessages();
+    // });
+  });
 
   async function fetchMetadata(tokenUri) {
     try {
@@ -203,62 +125,163 @@ function App() {
       if (response.ok) {
         return response.json();
       } else {
-        setErrorMessageFetch(response.status);
         return Promise.reject(response);
       }
     } catch (error) {
-      setErrorMessageFetch(error);
+      console.log(error);
     }
   }
 
-  useEffect(() => {
-    if (!window.ethereum) {
-      // console.log("no metamask detected");
-      setNoMetaMaskDetectedError(true);
-    }
-  }, []);
+  async function getUserDerpies() {
+    // useMoralis() includes account and provider
+    console.log("fetching derpies");
 
-  // listen for EIP-1193 events
-  useEffect(() => {
-    // guard clause to prevent site from reloading when user is changing metamask settings when not connected.
-    if (connectedAccount === "not connected") return;
-    if (window.ethereum) {
-      window.ethereum.on("chainChanged", () => {
-        setChainChanged(true);
-        setTimeout(() => {
-          window.location.reload();
-        }, 2500);
+    const options = {
+      contractAddress: DERPIES_ADDRESS,
+      abi: Derpies.abi,
+    };
+
+    const numDerpies = await Moralis.executeFunction({
+      ...options,
+      functionName: "balanceOf",
+      params: {
+        owner: account,
+      },
+    });
+    console.log(numDerpies.toString());
+
+    console.log("done fetching derpies");
+
+    let userDerpies = [];
+    for (const derpie of range(0, parseInt(numDerpies.toString()))) {
+      console.log(derpie);
+      //get token id
+      const tokenId = await Moralis.executeFunction({
+        ...options,
+        functionName: "tokenOfOwnerByIndex",
+        params: { owner: account, index: derpie },
       });
-      window.ethereum.on("accountsChanged", () => {
-        setAccountChanged(true);
-        setTimeout(() => {
-          window.location.reload();
-        }, 2500);
+      console.log(tokenId.toString());
+      //get token uri
+      const tokenUri = await Moralis.executeFunction({
+        ...options,
+        functionName: "tokenURI",
+        params: { tokenId: parseInt(tokenId.toString()) },
       });
+      console.log(tokenUri);
+      const tokenUriHttps = `https://ipfs.io/ipfs/${tokenUri.split("").splice(7).join("")}`;
+      const uriJSON = await fetchMetadata(tokenUriHttps);
+      // push tokenId and uriJson to userDerpies
+      userDerpies.push({ tokenId, uriJSON });
     }
-  });
+    return userDerpies;
+  }
 
-  useEffect(async () => {
-    // isMountedMint guards against running this useEffect on page load.
-    if (isMountedMint.current) {
-      if (newlyMintedDerpie === null) return;
+  async function mintDerpie() {
+    const options = {
+      contractAddress: DERPIES_ADDRESS,
+      abi: Derpies.abi,
+    };
+    console.log(options);
 
-      if (typeof window.ethereum !== "undefined") {
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        const contract = new ethers.Contract(DERPIES_ADDRESS, Derpies.abi, provider);
+    const mintTx = await Moralis.executeFunction({
+      ...options,
+      functionName: "mintDerpie",
+      msgValue: ethers.utils.parseEther("0.01"),
+    });
 
-        const tokenId = parseInt(newlyMintedDerpie.toString());
-        const tokenUri = await contract.tokenURI(newlyMintedDerpie);
-        // TODO - update here
+    setAwaitingBlockConfirmation(true);
+
+    setTransactionHash(mintTx.hash);
+
+    setMetamaskWaitingOnUser(false);
+    setMintingInProgress(true);
+
+    const mintTxReceipt = await mintTx.wait();
+    setAwaitingBlockConfirmation(false);
+
+    console.log(mintTxReceipt);
+    const requestId = mintTxReceipt.logs[3].topics[1];
+    const tokenId = mintTxReceipt.events[3].topics[2];
+
+    if (!PRODUCTION) {
+      // VRFCOORDINATORMOCK for localhost tests only
+      console.log("calling vrf coordinator mock");
+
+      const vrfOptions = {
+        contractAddress: VRFCOORDINATORMOCK_ADDRESS_LOCALHOST,
+        abi: VRFCoordinatorMock.abi,
+      };
+
+      const randNumTx = await Moralis.executeFunction({
+        ...vrfOptions,
+        functionName: "callBackWithRandomness",
+        params: { requestId: requestId, randomness: 22, consumerContract: DERPIES_ADDRESS },
+      });
+      await randNumTx.wait();
+    }
+
+    // display newly minted derpie
+    let retrieved = false;
+    while (retrieved === false) {
+      console.log("checking in 30 seconds");
+      await delay(CHAINLINK_WAIT_TIME_MS);
+      try {
+        const tokenUri = await Moralis.executeFunction({
+          ...options,
+          functionName: "tokenURI",
+          params: { tokenId: parseInt(tokenId) },
+        });
+        console.log(tokenUri);
         const tokenUriHttps = `https://ipfs.io/ipfs/${tokenUri.split("").splice(7).join("")}`;
         const uriJSON = await fetchMetadata(tokenUriHttps);
-        setMintedDerpieDetails({ tokenId, uriJSON });
+
+        setMintedDerpieDetails({ tokenId: parseInt(tokenId.toString()), uriJSON });
         setIsNewlyMinted(true);
+        retrieved = true;
+      } catch (error) {
+        console.log(error);
       }
-    } else {
-      isMountedMint.current = true;
     }
-  }, [newlyMintedDerpie]);
+  }
+
+  async function getUserDerpiesHandler() {
+    try {
+      if (!isWeb3Enabled) return;
+      clearErrorMessages();
+      setGettingUserDerpies(true);
+
+      const userDerpies = await getUserDerpies();
+      setUserDerpieDetails(userDerpies);
+      setShowGallery(true);
+    } catch (error) {
+      console.log(error);
+      setErrorMessageGallery(error);
+    }
+    setGettingUserDerpies(false);
+  }
+
+  async function mintDerpieHandler() {
+    try {
+      if (!isWeb3Enabled) return;
+      clearErrorMessages();
+      setIsNewlyMinted(false);
+      setMetamaskWaitingOnUser(true);
+
+      await mintDerpie();
+    } catch (error) {
+      console.log(error);
+      setErrorMessageMint(error);
+    }
+    setMetamaskWaitingOnUser(false);
+    setMintingInProgress(false);
+  }
+
+  function clearErrorMessages() {
+    setErrorMessageConnect(null);
+    setErrorMessageMint(null);
+    setErrorMessageGallery(null);
+  }
 
   useEffect(() => {
     clearErrorMessages();
@@ -266,19 +289,15 @@ function App() {
 
   return (
     <>
-      <Navbar setSelectedTab={setSelectedTab} connectedNetwork={connectedNetwork} connectedAccount={connectedAccount} />
+      <Navbar setSelectedTab={setSelectedTab} />
 
-      {rinkebyWarning && <RinkebyWarning />}
-      {chainChanged && <ChainChangedWarning />}
-      {accountChanged && <AccountChangedWarning />}
+      {isWeb3Enabled && chainId !== CORRECT_CHAIN_ID && <RinkebyWarning />}
+      {showAccountChangedWarning && <AccountChangedWarning />}
 
       {selectedTab === "About" && <About setSelectedTab={setSelectedTab} />}
       {selectedTab === "Mint" && (
         <Mint
-          noMetaMaskDetectedError={noMetaMaskDetectedError}
-          connectWalletHandler={connectWalletHandler}
-          isConnecting={isConnecting}
-          isConnected={isConnected}
+          isMetamaskInstalled={isMetamaskInstalled}
           errorMessageConnect={errorMessageConnect}
           setErrorMessageConnect={setErrorMessageConnect}
           mintDerpieHandler={mintDerpieHandler}
@@ -286,29 +305,31 @@ function App() {
           setErrorMessageMint={setErrorMessageMint}
           metamaskWaitingOnUser={metamaskWaitingOnUser}
           mintingInProgress={mintingInProgress}
-          mintWaitTimer={mintWaitTimer}
+          awaitingBlockConfirmation={awaitingBlockConfirmation}
           setSelectedTab={setSelectedTab}
           transactionHash={transactionHash}
           isNewlyMinted={isNewlyMinted}
           mintedDerpieDetails={mintedDerpieDetails}
+          handleConnectMetaMask={handleConnectMetaMask}
+          handleWalletConnect={handleWalletConnect}
         />
       )}
       {selectedTab === "Gallery" && (
         <Gallery
-          noMetaMaskDetectedError={noMetaMaskDetectedError}
-          connectWalletHandler={connectWalletHandler}
-          isConnecting={isConnecting}
-          isConnected={isConnected}
+          isMetamaskInstalled={isMetamaskInstalled}
+          isMetamaskLoading={isMetamaskLoading}
+          isWalletConnectLoading={isWalletConnectLoading}
           errorMessageConnect={errorMessageConnect}
           setErrorMessageConnect={setErrorMessageConnect}
           getUserDerpiesHandler={getUserDerpiesHandler}
           gettingUserDerpies={gettingUserDerpies}
           userDerpieDetails={userDerpieDetails}
-          errorMessageFetch={errorMessageFetch}
           errorMessageGallery={errorMessageGallery}
           setErrorMessageGallery={setErrorMessageMint}
           showGallery={showGallery}
           setShowGallery={setShowGallery}
+          handleConnectMetaMask={handleConnectMetaMask}
+          handleWalletConnect={handleWalletConnect}
         />
       )}
     </>
