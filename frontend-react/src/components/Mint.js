@@ -9,7 +9,7 @@ import MetaMaskOpen from "./alerts/WalletOpenMessage";
 import ConnectButton from "./ConnectButton";
 
 import FoxMetamask from "../img/FoxFace.png";
-import walletConnectImg from "../img/wallet-connect.jpg";
+import walletConnectImg from "../img/wallet-connect.png";
 
 import { CORRECT_CHAIN_ID } from "../lib/constants";
 

@@ -35,6 +35,8 @@
 }
 .custom-connect-btn {
   width: 400px;
+  display: flex;
+  justify-content: flex-start;
 }
 
 .custom-connect-status {
