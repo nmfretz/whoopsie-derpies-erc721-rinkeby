@@ -30,13 +30,13 @@ const MintProgressNotification = ({ awaitingBlockConfirmation, setSelectedTab, t
           <button className="button is-loading custom-mint-wait-btn"></button>
         </div>
       ) : (
-        <div className="is-flex is-justify-content-center is-align-items-center">
+        <div className="is-flex is-flex-direction-column is-justify-content-center is-align-items-center">
           <p className="">
             Transaction confirmed! Now waiting on{" "}
             <a className="" href="https://docs.chain.link/docs/chainlink-vrf/" target="_blank" rel="noreferrer">
               ChainLink VRF
             </a>{" "}
-            to generate a random number for your Derpie. This may take up to 5 minutes
+            to generate a random number for your Derpie. This may take up to 5 minutes.
           </p>
           <button className="button is-loading custom-mint-wait-btn"></button>
         </div>

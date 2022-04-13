@@ -82,7 +82,7 @@ function App() {
     console.log("connecting to Wallet Connect");
     const web3Provider = enableWeb3({
       provider: "walletconnect",
-      mobileLinks: ["rainbow", "metamask", "trust"],
+      mobileLinks: ["metamask"],
     });
     console.log(web3Provider);
     setIsWalletConnectLoading(false);
