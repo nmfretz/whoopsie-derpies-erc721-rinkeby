@@ -45,7 +45,7 @@ const Mint = (props) => {
           Make sure your wallet is connected to the Rinkeby Ethereum Testnet (network id: 4) and is funded with Rinkeby
           test ether.
         </p>
-        <p className="custom-smaller-mobile-text">
+        <p className="custom-smaller-mobile-text pt-1">
           You can get test ether from a faucet. Try this one:{" "}
           <a href="https://faucets.chain.link/rinkeby" target="_blank" rel="noreferrer">
             https://faucets.chain.link/rinkeby
@@ -81,7 +81,7 @@ const Mint = (props) => {
             disabled={mintingInProgress || chainId !== CORRECT_CHAIN_ID}
             onClick={mintDerpieHandler}
           >
-            Mint a Whoospie Derpie
+            Mint a Whoopsie Derpie
           </button>
         )}
 
@@ -93,27 +93,29 @@ const Mint = (props) => {
             transactionHash={transactionHash}
           />
         )}
-        {/* <MintProgressNotification
-          awaitingBlockConfirmation={awaitingBlockConfirmation}
-     
-          setSelectedTab={setSelectedTab}
-          transactionHash={transactionHash}
-        /> */}
+
         {errorMessageMint !== null && (
           <ErrorMessage errorMessage={errorMessageMint} setErrorMessage={setErrorMessageMint} />
         )}
         <div className="is-flex is-flex-direction-column is-justify-content-center is-align-items-center mt-4">
           {isWeb3Enabled && isNewlyMinted && (
             <>
-              <p className="is-size-4 is-uppercase">
-                <FontAwesomeIcon className="fas fa-2x fa-solid is-size-3 " icon={faStar} /> a new derpie is born!{" "}
-                <FontAwesomeIcon className="fas fa-2x fa-solid is-size-3" icon={faStar} />
+              <p className="is-size-4 is-size-5-mobile is-uppercase">
+                <FontAwesomeIcon className="fas fa-2x fa-solid is-size-3 is-size-4-mobile " icon={faStar} /> a new
+                derpie is born!{" "}
+                <FontAwesomeIcon className="fas fa-2x fa-solid is-size-3 is-size-4-mobile" icon={faStar} />
               </p>
               <div className="is-flex is-flex-direction-column is-justify-content-center is-align-items-center mt-4">
                 <DerpieCard derpieDetails={mintedDerpieDetails} />
               </div>
-              <p className="is-size-7 pt-3">Transaction Hash:</p>
-              <p className="is-size-7">{transactionHash}</p>
+              {/* <p className="is-size-7 pt-3">Transaction Hash:</p>
+              <p className="is-size-7 custom-word-wrap">{transactionHash}</p> */}
+              <p className="is-size-7 pt-3">
+                View transaction on etherscan{" "}
+                <a href={`https://rinkeby.etherscan.io/tx/${transactionHash}`} target="_blank" rel="noreferrer">
+                  here
+                </a>
+              </p>
             </>
           )}
         </div>

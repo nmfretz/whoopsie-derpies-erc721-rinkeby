@@ -33,6 +33,7 @@
   align-items: center;
   margin-top: 2rem;
 }
+
 .custom-connect-btn {
   width: 400px;
   display: flex;
@@ -108,7 +109,7 @@
 }
 
 .custom-word-wrap {
-  word-wrap: break-word;
+  word-wrap: break-word !important;
 }
 
 @media screen and (max-width: 500px) {
@@ -121,7 +122,7 @@
   }
 
   .custom-mobile-subtitle {
-    font-size: 1.2rem;
+    font-size: 1rem;
   }
 
   .custom-smaller-mobile-text {
@@ -139,11 +140,17 @@
   .custom-mobile-metamask-fox {
     display: flex;
     align-items: center;
-    width: 70px !important;
+    width: 50px !important;
   }
 
   .shizuru {
     font-size: 2rem;
+  }
+
+  .custom-connect-btn {
+    width: 90vw;
+    padding-top: 2.5em !important;
+    padding-bottom: 2.5em !important;
   }
 }
 

@@ -6,12 +6,14 @@ const MintProgressNotification = ({ awaitingBlockConfirmation, setSelectedTab, t
   }
 
   return (
-    <div className="notification is-primary is-light container mt-5">
+    <div className="notification is-primary is-light container mt-5 custom-smaller-mobile-text">
       {/* <button className="button is-loading custom-mint-wait-btn"></button> */}
-      <p className="mb-3">Your Derpie will show here soon!</p>
       <p className="mb-3">
-        It may take up to 5 minutes for your random Derpie to be processed by the ethereum rinkeby network. You can view
-        your pending transaction on etherscan here:{" "}
+        Your Derpie will show here soon! Refreshing the page will prevent you from seeing your newly minted Derpie here,
+        but you will be able to view it in the <a onClick={galleryClickHandler}>Gallery</a> once it has been processed.
+      </p>
+      <p className="mb-3">
+        You can view your pending transaction on etherscan here:{" "}
         <a
           className="custom-word-wrap"
           href={`https://rinkeby.etherscan.io/tx/${transactionHash}`}
@@ -34,17 +36,11 @@ const MintProgressNotification = ({ awaitingBlockConfirmation, setSelectedTab, t
             <a className="" href="https://docs.chain.link/docs/chainlink-vrf/" target="_blank" rel="noreferrer">
               ChainLink VRF
             </a>{" "}
-            to generate a random number for your Derpie
+            to generate a random number for your Derpie. This may take up to 5 minutes
           </p>
           <button className="button is-loading custom-mint-wait-btn"></button>
         </div>
       )}
-
-      {/* 
-      <p>
-        Refreshing the page will prevent you from seeing your newly minted Derpie here, but you will be able to view it
-        in the <a onClick={galleryClickHandler}>Gallery</a> once it has been processed.
-      </p> */}
     </div>
   );
 };
