@@ -62,12 +62,12 @@ const Mint = (props) => {
               isDisabled={isMetamaskInstalled}
             />
 
-            <ConnectButton
+            {/* <ConnectButton
               isWeb3EnableLoading={isWeb3EnableLoading}
               connectWalletHandler={handleWalletConnect}
               logo={walletConnectImg}
               text={"Wallet Connect"}
-            />
+            /> */}
           </div>
         )}
 

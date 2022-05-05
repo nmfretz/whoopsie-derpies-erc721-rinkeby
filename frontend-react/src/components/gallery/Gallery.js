@@ -47,13 +47,13 @@ const Gallery = (props) => {
               isDisabled={isMetamaskInstalled}
             />
 
-            <ConnectButton
+            {/* <ConnectButton
               isWeb3EnableLoading={isWeb3EnableLoading}
               isLoading={isWalletConnectLoading}
               connectWalletHandler={handleWalletConnect}
               logo={walletConnectImg}
               text={"Wallet Connect"}
-            />
+            /> */}
           </div>
         )}
 
