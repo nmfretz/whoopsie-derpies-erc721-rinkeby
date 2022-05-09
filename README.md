@@ -6,7 +6,7 @@ A total of 500 Whoopsie Derpies can be minted on-chain. There are 20 unique anim
 
 The specific animal you mint is determined during the minting process, using Chainlink's VRF to introduce randomness.
 
-Front end currently deployed to netlify at https://whoopsiederpiesrinkeby.netlify.app.
+Front end currently deployed at https://whoopsiederpies721rinkeby.netlify.app.
 
 Smart contract deployed to the Ethereum Rinkeby testnet at contract address 0xFae806Ef5fDadCBa0db4716228EC625d1FC64196. View verified contract at https://rinkeby.etherscan.io/address/0xFae806Ef5fDadCBa0db4716228EC625d1FC64196
 
@@ -123,7 +123,7 @@ npx hardhat run scripts/deploy_rinkeby.js --network rinkeby
 
 ### Frontend
 
-Front end currently deployed to netlify at https://whoopsiederpiesrinkeby.netlify.app.
+Front end currently deployed to netlify at https://whoopsiederpies721rinkeby.netlify.app.
 
 Make sure to import correct correct contract abi to `App.js` from `contracts/`
 
